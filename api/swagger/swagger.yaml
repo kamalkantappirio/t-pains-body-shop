@@ -1,0 +1,184 @@
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: Assignment by sandeep
+# during dev, should point to your local machine
+host: localhost:60002
+# basePath prefixes all resource paths 
+basePath: /api
+# 
+schemes:
+  # tip: remove http to make production-grade
+  - http
+  - https
+# format of bodies a client can send (Content-Type)
+consumes:
+  - application/json
+# format of the responses to the client (Accepts)
+produces:
+  - application/json
+paths:
+  /auth/login:
+    x-swagger-router-controller: auth
+    post:
+      description: Issues a valid JWT for an external system to have access to the backend API
+      operationId: login
+      parameters:
+      - name: body
+        in: body
+        description: The credentials of the user attempting to login
+        required: true
+        schema:
+          $ref: "#/definitions/Login"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/LoginResult"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /auth/refresh:
+    x-swagger-router-controller: auth
+    post:
+      description: Issues a new JWT for user access given a refresh token
+      operationId: refresh
+      parameters:
+      - name: body
+        in: body
+        description: The refresh token of a successful prior login
+        required: true
+        schema:
+          $ref: "#/definitions/Refresh"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/LoginResult"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /user/profile:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: user
+    get:
+      description: Returns the consolidated profile of a given user
+      # used as the method name of the controller
+      operationId: profile
+      parameters:
+      - name: Authorization
+        in: header
+        description: A valid JWT for a logged in user
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/UserProfile"
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /user/permissions:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: user
+    get:
+      description: Returns the consolidated profile of a given user
+      # used as the method name of the controller
+      operationId: permissions
+      parameters:
+      - name: Authorization
+        in: header
+        description: A valid JWT for a logged in user
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/UserPermissions"
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /hello:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: hello_world
+    get:
+      description: Returns 'Hello' to the caller
+      # used as the method name of the controller
+      operationId: hello
+      parameters:
+        - name: name
+          in: query
+          description: The name of the person to whom to say hello
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/HelloWorldResponse"
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /swagger:
+    x-swagger-pipe: swagger_raw
+# complex objects have schema definitions
+definitions:
+  HelloWorldResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string
+  Login:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+  Refresh:
+    properties:
+      refresh_token:
+        type: string
+  LoginResult:
+    properties:
+      access_token:
+        type: string
+      token_type:
+        type: string
+      refresh_token:
+        type: string
+  UserProfile:
+    properties:
+      first_name:
+        type: string
+      last_name:
+        type: string
+  UserPermission:
+    properties:
+      code:
+        type: string
+      label:
+        type: string
+  UserPermissions:
+    type: array
+    items:
+      $ref: "#/definitions/UserPermission"
+  ErrorResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string

@@ -1,0 +1,47 @@
+version: '3'
+services:
+  app_postgres:
+    container_name: assignment_by_kamalkant_postgres
+    image: "mdillon/postgis"
+    ports:
+      - 60000:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=assignment_by_kamalkant
+  app_redis:
+    container_name: assignment_by_kamalkant_redis
+    image: redis:3.2
+    ports:
+      - 60001:6379
+  app:
+    container_name: assignment_by_kamalkant
+    build: .
+    volumes:
+      - ./.env:/app/.env
+      - ./index.js:/app/index.js
+      - ./package.json:/app/package.json
+      - ./api:/app/api
+      - ./public:/app/public
+      - ./src:/app/src
+      - ./build:/app/build
+    depends_on:
+      - app_postgres
+      - app_redis
+    links:
+      - app_postgres
+      - app_redis
+    ports:
+      - 60004:3000 # React Development Server
+      - 60002:3001 # Web API
+      - 60003:5858 # Debugging port for Web API
+      - 60005:3002 # Swagger Project Editor
+    environment:
+      DATABASE_URL: postgres://postgres:password@app_postgres:5432/assignment_by_kamalkant
+      POSTGRES_LOGGING: "true" # Logs out every query that Postgres runs through Sequelize
+      RECREATE_SCHEMA: "true" # Nukes the database on every refresh
+      REDIS_URL: redis://app_redis:6379
+      AUTH_SAML_ENABLED: "false"
+      AUTH_SALESFORCE_ENABLED: "false"
+    command: ["node", "docker.js"]
+    restart: always
