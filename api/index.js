@@ -29,7 +29,7 @@ async function api(app) {
   const swaggerExpress = await SwaggerExpress.createAsync(config);
   swaggerExpress.register(app);
 
-  await models.Migrations.MigratePermission();
-  await models.Migrations.MigrateUser();
+  //await models.Migrations.MigratePermission();
+  //await models.Migrations.MigrateUser();
   return app;
 }
