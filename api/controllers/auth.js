@@ -21,7 +21,7 @@ async function login(req, res) {
   });
 
   if (!userEmail) {
-    return res.status(401).json({message: `Unauthorized access1`});
+    return res.status(401).json({message: `Unauthorized access`});
   }
 
   let user = await User.findOne({
@@ -64,7 +64,7 @@ async function register(req, res) {
 
     let email = await UserEmail.create({user_id: user.get({plain: true}).id, email: req.body.email, is_primary: true}, {fields: ['user_id', 'email', 'is_primary']});
 
-    let {accessToken, refreshToken, expiresIn} = await jwtService.sign({
+    let {accessToken, refreshToken} = await jwtService.sign({
       userId: user.get({plain: true}).id
     });
 
